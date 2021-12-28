@@ -3,6 +3,9 @@ using Unity.MLAgents;
 using Unity.MLAgents.Actuators;
 using Unity.MLAgentsExamples;
 using Unity.MLAgents.Sensors;
+using System;
+using Sentry;
+using Sentry.Unity;
 using Random = UnityEngine.Random;
 
 [RequireComponent(typeof(JointDriveController))] // Required to set joint forces
@@ -199,38 +202,45 @@ public class CrawlerAgent : Agent
 
     void FixedUpdate()
     {
-        UpdateOrientationObjects();
-
-        // If enabled the feet will light up green when the foot is grounded.
-        // This is just a visualization and isn't necessary for function
-        if (useFootGroundedVisualization)
+        try
         {
-            foot0.material = m_JdController.bodyPartsDict[leg0Lower].groundContact.touchingGround
-                ? groundedMaterial
-                : unGroundedMaterial;
-            foot1.material = m_JdController.bodyPartsDict[leg1Lower].groundContact.touchingGround
-                ? groundedMaterial
-                : unGroundedMaterial;
-            foot2.material = m_JdController.bodyPartsDict[leg2Lower].groundContact.touchingGround
-                ? groundedMaterial
-                : unGroundedMaterial;
-            foot3.material = m_JdController.bodyPartsDict[leg3Lower].groundContact.touchingGround
-                ? groundedMaterial
-                : unGroundedMaterial;
+            UpdateOrientationObjects();
+
+            // If enabled the feet will light up green when the foot is grounded.
+            // This is just a visualization and isn't necessary for function
+            if (useFootGroundedVisualization)
+            {
+                foot0.material = m_JdController.bodyPartsDict[leg0Lower].groundContact.touchingGround
+                    ? groundedMaterial
+                    : unGroundedMaterial;
+                foot1.material = m_JdController.bodyPartsDict[leg1Lower].groundContact.touchingGround
+                    ? groundedMaterial
+                    : unGroundedMaterial;
+                foot2.material = m_JdController.bodyPartsDict[leg2Lower].groundContact.touchingGround
+                    ? groundedMaterial
+                    : unGroundedMaterial;
+                foot3.material = m_JdController.bodyPartsDict[leg3Lower].groundContact.touchingGround
+                    ? groundedMaterial
+                    : unGroundedMaterial;
+            }
+
+            var cubeForward = m_OrientationCube.transform.forward;
+
+            // Set reward for this step according to mixture of the following elements.
+            // a. Match target speed
+            //This reward will approach 1 if it matches perfectly and approach zero as it deviates
+            var matchSpeedReward = GetMatchingVelocityReward(cubeForward * TargetWalkingSpeed, GetAvgVelocity());
+
+            // b. Rotation alignment with target direction.
+            //This reward will approach 1 if it faces the target direction perfectly and approach zero as it deviates
+            var lookAtTargetReward = (Vector3.Dot(cubeForward, body.forward) + 1) * .5F;
+
+            AddReward(matchSpeedReward * lookAtTargetReward);
         }
-
-        var cubeForward = m_OrientationCube.transform.forward;
-
-        // Set reward for this step according to mixture of the following elements.
-        // a. Match target speed
-        //This reward will approach 1 if it matches perfectly and approach zero as it deviates
-        var matchSpeedReward = GetMatchingVelocityReward(cubeForward * TargetWalkingSpeed, GetAvgVelocity());
-
-        // b. Rotation alignment with target direction.
-        //This reward will approach 1 if it faces the target direction perfectly and approach zero as it deviates
-        var lookAtTargetReward = (Vector3.Dot(cubeForward, body.forward) + 1) * .5F;
-
-        AddReward(matchSpeedReward * lookAtTargetReward);
+        catch (Exception err)
+        {
+            SentrySdk.CaptureException(err);
+        }
     }
 
     /// <summary>
