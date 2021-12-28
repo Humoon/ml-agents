@@ -202,45 +202,38 @@ public class CrawlerAgent : Agent
 
     void FixedUpdate()
     {
-        try
+        UpdateOrientationObjects();
+
+        // If enabled the feet will light up green when the foot is grounded.
+        // This is just a visualization and isn't necessary for function
+        if (useFootGroundedVisualization)
         {
-            UpdateOrientationObjects();
-
-            // If enabled the feet will light up green when the foot is grounded.
-            // This is just a visualization and isn't necessary for function
-            if (useFootGroundedVisualization)
-            {
-                foot0.material = m_JdController.bodyPartsDict[leg0Lower].groundContact.touchingGround
-                    ? groundedMaterial
-                    : unGroundedMaterial;
-                foot1.material = m_JdController.bodyPartsDict[leg1Lower].groundContact.touchingGround
-                    ? groundedMaterial
-                    : unGroundedMaterial;
-                foot2.material = m_JdController.bodyPartsDict[leg2Lower].groundContact.touchingGround
-                    ? groundedMaterial
-                    : unGroundedMaterial;
-                foot3.material = m_JdController.bodyPartsDict[leg3Lower].groundContact.touchingGround
-                    ? groundedMaterial
-                    : unGroundedMaterial;
-            }
-
-            var cubeForward = m_OrientationCube.transform.forward;
-
-            // Set reward for this step according to mixture of the following elements.
-            // a. Match target speed
-            //This reward will approach 1 if it matches perfectly and approach zero as it deviates
-            var matchSpeedReward = GetMatchingVelocityReward(cubeForward * TargetWalkingSpeed, GetAvgVelocity());
-
-            // b. Rotation alignment with target direction.
-            //This reward will approach 1 if it faces the target direction perfectly and approach zero as it deviates
-            var lookAtTargetReward = (Vector3.Dot(cubeForward, body.forward) + 1) * .5F;
-
-            AddReward(matchSpeedReward * lookAtTargetReward);
+            foot0.material = m_JdController.bodyPartsDict[leg0Lower].groundContact.touchingGround
+                ? groundedMaterial
+                : unGroundedMaterial;
+            foot1.material = m_JdController.bodyPartsDict[leg1Lower].groundContact.touchingGround
+                ? groundedMaterial
+                : unGroundedMaterial;
+            foot2.material = m_JdController.bodyPartsDict[leg2Lower].groundContact.touchingGround
+                ? groundedMaterial
+                : unGroundedMaterial;
+            foot3.material = m_JdController.bodyPartsDict[leg3Lower].groundContact.touchingGround
+                ? groundedMaterial
+                : unGroundedMaterial;
         }
-        catch (Exception err)
-        {
-            SentrySdk.CaptureException(err);
-        }
+
+        var cubeForward = m_OrientationCube.transform.forward;
+
+        // Set reward for this step according to mixture of the following elements.
+        // a. Match target speed
+        //This reward will approach 1 if it matches perfectly and approach zero as it deviates
+        var matchSpeedReward = GetMatchingVelocityReward(cubeForward * TargetWalkingSpeed, GetAvgVelocity());
+
+        // b. Rotation alignment with target direction.
+        //This reward will approach 1 if it faces the target direction perfectly and approach zero as it deviates
+        var lookAtTargetReward = (Vector3.Dot(cubeForward, body.forward) + 1) * .5F;
+
+        AddReward(matchSpeedReward * lookAtTargetReward);
     }
 
     /// <summary>
