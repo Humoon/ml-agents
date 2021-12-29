@@ -1,121 +1,109 @@
-using System.Collections;
 using System.Collections.Generic;
+using System.Text;
+using Unity.Profiling;
 using UnityEngine;
 using UnityEngine.Profiling;
 using Sentry;
 using Sentry.Unity;
+using System;
 
 public class SentryMonitor : MonoBehaviour
 {
-    private int _counter = 0;
-    private int m_TotalVerts;
-    private int m_TotalTriangles;
-    private float m_FPS;
-    private long m_AllocatedMemory;
-    private long m_AllMemory;
+    private int frameCount = 0;
 
-    private float f_UpdateInterval = 0.5F;
-    private float f_LastInterval;
+    string statsText;
 
-    // private GameObject testObject = null;
+    ProfilerRecorder totalUsedRecorder;
+    ProfilerRecorder systemUsedMemoryRecorder;
+    // ProfilerRecorder gcMemoryRecorder;
+    ProfilerRecorder gameObjectCountRecorder;
+    ProfilerRecorder objectCountRecorder;
+    ProfilerRecorder verticesRecorder;
+    ProfilerRecorder trianglesRecorder;
 
-
-    void Start()
+    private void Start()
     {
         SentryUnity.Init(o =>
         {
-            o.Dsn = "https://449798ce6def47ceba65af22e57d30c9@o1039766.ingest.sentry.io/6115983";
+            // o.Dsn = "http://0c853a6b79b14c30a9ab2b56fbc79449@127.0.0.1:9000/9"; //local
+            o.Dsn = "http://888fe57eba274af794fe857cccdbb379@jssz-ai-newton-cpu-03:9000/5"; //server
+            o.Debug = false;
             o.EnableLogDebouncing = true;
-            o.Debug = true;
             o.Environment = "production";
-            o.SampleRate = 1;
+            o.TracesSampleRate = 1.0;
+            // o.MaxBreadcrumbs = 10; //控制应该捕获breadcrumbs的数量,默认100
         });
-
-        // The time between debug calls of the same type is less than 1s
-        // Every following call of the same type gets ignored until 1s has passed
-
-        Debug.Log("Log");              // recorded
-        Debug.Log("Log 2");            // not recorded
-        Debug.LogWarning("Warning");   // recorded
-        Debug.LogWarning("Warning 2"); // not recorded
-        Debug.LogError("Error");       // recorded
-        Debug.LogError("Error 2");     // not recorded
-
-        f_LastInterval = Time.realtimeSinceStartup;
-
-        // This will throw a Null Reference Exception
-        // testObject.GetComponent<Transform>();   // Captured error
     }
 
-    void GetAllObjectsInfo()
+
+    static double GetRecorderFrameAverage(ProfilerRecorder recorder)
     {
-        m_TotalVerts = 0;
-        m_TotalTriangles = 0;
-        GameObject[] ob = FindObjectsOfType(typeof(GameObject)) as GameObject[];
-        foreach (GameObject obj in ob)
+        var samplesCount = recorder.Capacity;
+        if (samplesCount == 0)
+            return 0;
+
+        double r = 0;
+        unsafe
         {
-            GetAllVertsAndTris(obj);
+            var samples = stackalloc ProfilerRecorderSample[samplesCount];
+            recorder.CopyTo(samples, samplesCount);
+            for (var i = 0; i < samplesCount; ++i)
+                r += samples[i].Value;
+            r /= samplesCount;
         }
+
+        return r;
     }
 
-    void GetRuntimeInfo()
+    void OnEnable()
     {
-        m_FPS = 1 / Time.unscaledDeltaTime;
-        m_AllocatedMemory = Profiler.GetMonoUsedSizeLong() / (1024 * 1024);
-        m_AllMemory = Profiler.GetTotalAllocatedMemoryLong() / (1024 * 1024);
 
-        // Object[] textures = Resources.FindObjectsOfTypeAll(typeof(Texture));
-        // foreach (Texture t in textures)
-        // {
-        //     Debug.Log("Texture object " + t.name + " using: " + Profiler.GetRuntimeMemorySizeLong((Texture)t) + "Bytes");
-        // }
+        // Momory Profiler
+        totalUsedRecorder = ProfilerRecorder.StartNew(ProfilerCategory.Memory, "Total Used Memory");
+        systemUsedMemoryRecorder = ProfilerRecorder.StartNew(ProfilerCategory.Memory, "System Used Memory");
+        // gcMemoryRecorder = ProfilerRecorder.StartNew(ProfilerCategory.Memory, "GC Reserved Memory");
+        gameObjectCountRecorder = ProfilerRecorder.StartNew(ProfilerCategory.Memory, "Game Object Count");
+        objectCountRecorder = ProfilerRecorder.StartNew(ProfilerCategory.Memory, "Object Count");
+
+        // Render Profiler
+        verticesRecorder = ProfilerRecorder.StartNew(ProfilerCategory.Render, "Vertices Count");
+        trianglesRecorder = ProfilerRecorder.StartNew(ProfilerCategory.Render, "Triangles Count");
     }
 
-    void GetAllVertsAndTris(GameObject obj)
+    void OnDisable()
     {
-        Component[] filters;
-        filters = obj.GetComponentsInChildren<MeshFilter>();
-        foreach (MeshFilter f in filters)
-        {
-            m_TotalTriangles += f.sharedMesh.triangles.Length / 3;
-            m_TotalVerts += f.sharedMesh.vertexCount;
-        }
+        totalUsedRecorder.Dispose();
+        systemUsedMemoryRecorder.Dispose();
+        // gcMemoryRecorder.Dispose();
+        gameObjectCountRecorder.Dispose();
+        objectCountRecorder.Dispose();
+
+        verticesRecorder.Dispose();
+        trianglesRecorder.Dispose();
+    }
+    void Update()
+    {
+        frameCount++;
+
+        var sb = new StringBuilder(500);
+        sb.AppendLine($"Frame Count: {frameCount} - {Convert.ToInt32(1 / Time.unscaledDeltaTime)} fps");
+        // sb.AppendLine($"GC Memory: {gcMemoryRecorder.LastValue / (1024 * 1024)} MB");
+        sb.AppendLine($"System Used Memory: {systemUsedMemoryRecorder.LastValue / (1024 * 1024)} MB");
+        sb.AppendLine($"Total Used Memory: {totalUsedRecorder.LastValue / (1024 * 1024)} MB");
+
+        sb.AppendLine($"Game Object Count: {gameObjectCountRecorder.LastValue}");
+        sb.AppendLine($"Object Count: {objectCountRecorder.LastValue}");
+
+        sb.AppendLine($"Vertices: {verticesRecorder.LastValue}");
+        sb.AppendLine($"Triangles: {trianglesRecorder.LastValue}");
+
+        statsText = sb.ToString();
+
+        SentrySdk.AddBreadcrumb(statsText);
     }
 
     void OnGUI()
     {
-        string fpsplay = m_FPS.ToString("FPS: #,##0");
-        GUILayout.Label(fpsplay);
-
-        string allocatedMemoryplay = m_AllocatedMemory.ToString("Allocated Memory: #,##0 MB");
-        GUILayout.Label(allocatedMemoryplay);
-        string allMemoryplay = m_AllMemory.ToString("All Memory: #,##0 MB");
-        GUILayout.Label(allMemoryplay);
-
-        string vertsdisplay = m_TotalVerts.ToString("Total Verts: #,##0");
-        GUILayout.Label(vertsdisplay);
-        string trisdisplay = m_TotalTriangles.ToString("Total Triangles: #,##0");
-        GUILayout.Label(trisdisplay);
-    }
-
-    void Update()
-    {
-        if (Time.realtimeSinceStartup > f_LastInterval + f_UpdateInterval)
-        {
-            f_LastInterval = Time.realtimeSinceStartup;
-            GetAllObjectsInfo();
-            GetRuntimeInfo();
-        }
-        _counter++;
-        // if (_counter % 100 == 0)
-        // {
-        //     // SentrySdk.AddBreadcrumb("Frame number: " + _counter + "| FPS: " + m_FPS + "| Verts: " + m_TotalVerts + "| Triangles: " + m_TotalTriangles + "| UsedMemory: " + m_AllocatedMemory + " MB");
-        //     Debug.Log("Captured Log");              // Breadcrumb
-        //     Debug.LogWarning("Captured Warning");   // Breadcrumb
-        //     Debug.LogError("Captured Error");       // Captured Error
-
-        //     // This will throw a Null Reference Exception
-        //     // testObject.GetComponent<Transform>();   // Captured error
-        // }
+        GUI.TextArea(new Rect(10, 30, 250, 120), statsText);
     }
 }
