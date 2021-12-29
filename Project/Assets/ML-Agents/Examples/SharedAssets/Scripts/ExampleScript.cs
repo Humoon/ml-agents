@@ -9,9 +9,6 @@ using System;
 
 public class ExampleScript : MonoBehaviour
 {
-    // private float f_UpdateInterval = 0.5F;
-    // private float f_LastInterval;
-
     private int frameCount = 0;
 
     string statsText;
@@ -40,8 +37,6 @@ public class ExampleScript : MonoBehaviour
             o.TracesSampleRate = 1.0;
             // o.MaxBreadcrumbs = 10; //控制应该捕获breadcrumbs的数量,默认100
         });
-
-        // f_LastInterval = Time.realtimeSinceStartup;
     }
 
 
@@ -72,7 +67,6 @@ public class ExampleScript : MonoBehaviour
         totalUsedRecorder = ProfilerRecorder.StartNew(ProfilerCategory.Memory, "Total Used Memory");
         systemMemoryRecorder = ProfilerRecorder.StartNew(ProfilerCategory.Memory, "System Used Memory");
         gcMemoryRecorder = ProfilerRecorder.StartNew(ProfilerCategory.Memory, "GC Reserved Memory");
-
         gameObjectCountRecorder = ProfilerRecorder.StartNew(ProfilerCategory.Memory, "Game Object Count");
         objectCountRecorder = ProfilerRecorder.StartNew(ProfilerCategory.Memory, "Object Count");
 
@@ -97,9 +91,6 @@ public class ExampleScript : MonoBehaviour
     void Update()
     {
         frameCount++;
-        // if (Time.realtimeSinceStartup > f_LastInterval + f_UpdateInterval)
-        // {
-        // f_LastInterval = Time.realtimeSinceStartup;
 
         var sb = new StringBuilder(1000);
         sb.AppendLine($"Frame Count: {frameCount} - {Convert.ToInt32(1 / Time.unscaledDeltaTime)} fps");
@@ -115,7 +106,6 @@ public class ExampleScript : MonoBehaviour
         statsText = sb.ToString();
 
         SentrySdk.AddBreadcrumb(statsText);
-        // }
     }
 
     void OnGUI()
