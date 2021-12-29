@@ -16,7 +16,6 @@ public class ExampleScript : MonoBehaviour
     ProfilerRecorder totalUsedRecorder;
     ProfilerRecorder systemMemoryRecorder;
     ProfilerRecorder gcMemoryRecorder;
-    ProfilerRecorder mainThreadTimeRecorder;
     //场景中游戏对象的总数
     ProfilerRecorder gameObjectCountRecorder;
     //所有资源的总数。如果此数值随时间推移而上升，表示应用程序创建了一些永不销毁或上载的游戏对象或其他资源
@@ -61,7 +60,6 @@ public class ExampleScript : MonoBehaviour
 
     void OnEnable()
     {
-        mainThreadTimeRecorder = ProfilerRecorder.StartNew(ProfilerCategory.Internal, "Main Thread", 15);
 
         // Momory Profiler
         totalUsedRecorder = ProfilerRecorder.StartNew(ProfilerCategory.Memory, "Total Used Memory");
@@ -80,7 +78,6 @@ public class ExampleScript : MonoBehaviour
         totalUsedRecorder.Dispose();
         systemMemoryRecorder.Dispose();
         gcMemoryRecorder.Dispose();
-        mainThreadTimeRecorder.Dispose();
         gameObjectCountRecorder.Dispose();
         objectCountRecorder.Dispose();
 
