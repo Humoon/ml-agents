@@ -35,26 +35,6 @@ public class SentryMonitor : MonoBehaviour
         });
     }
 
-
-    static double GetRecorderFrameAverage(ProfilerRecorder recorder)
-    {
-        var samplesCount = recorder.Capacity;
-        if (samplesCount == 0)
-            return 0;
-
-        double r = 0;
-        unsafe
-        {
-            var samples = stackalloc ProfilerRecorderSample[samplesCount];
-            recorder.CopyTo(samples, samplesCount);
-            for (var i = 0; i < samplesCount; ++i)
-                r += samples[i].Value;
-            r /= samplesCount;
-        }
-
-        return r;
-    }
-
     void OnEnable()
     {
 
@@ -102,8 +82,8 @@ public class SentryMonitor : MonoBehaviour
         SentrySdk.AddBreadcrumb(statsText);
     }
 
-    void OnGUI()
-    {
-        GUI.TextArea(new Rect(10, 30, 250, 120), statsText);
-    }
+    // void OnGUI()
+    // {
+    //     GUI.TextArea(new Rect(10, 30, 250, 120), statsText);
+    // }
 }
