@@ -16,13 +16,9 @@ public class ExampleScript : MonoBehaviour
     ProfilerRecorder totalUsedRecorder;
     ProfilerRecorder systemMemoryRecorder;
     ProfilerRecorder gcMemoryRecorder;
-    //场景中游戏对象的总数
     ProfilerRecorder gameObjectCountRecorder;
-    //所有资源的总数。如果此数值随时间推移而上升，表示应用程序创建了一些永不销毁或上载的游戏对象或其他资源
     ProfilerRecorder objectCountRecorder;
-    //Unity 在一帧内处理的顶点数
     ProfilerRecorder verticesRecorder;
-    //Unity 在一帧内处理的三角形数
     ProfilerRecorder trianglesRecorder;
 
     private void Start()
