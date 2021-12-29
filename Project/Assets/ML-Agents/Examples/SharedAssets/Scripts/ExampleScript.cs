@@ -15,7 +15,7 @@ public class ExampleScript : MonoBehaviour
 
     ProfilerRecorder totalUsedRecorder;
     ProfilerRecorder systemMemoryRecorder;
-    ProfilerRecorder gcMemoryRecorder;
+    // ProfilerRecorder gcMemoryRecorder;
     ProfilerRecorder gameObjectCountRecorder;
     ProfilerRecorder objectCountRecorder;
     ProfilerRecorder verticesRecorder;
@@ -25,7 +25,7 @@ public class ExampleScript : MonoBehaviour
     {
         SentryUnity.Init(o =>
         {
-            o.Dsn = "http://0c853a6b79b14c30a9ab2b56fbc79449@127.0.0.1:9000/9";
+            o.Dsn = "http://0c853a6b79b14c30a9ab2b56fbc79449@127.0.0.1:9000/9";//self-hosted sentry
             o.Debug = true;
             o.EnableLogDebouncing = true;
             o.Environment = "production";
@@ -60,7 +60,7 @@ public class ExampleScript : MonoBehaviour
         // Momory Profiler
         totalUsedRecorder = ProfilerRecorder.StartNew(ProfilerCategory.Memory, "Total Used Memory");
         systemMemoryRecorder = ProfilerRecorder.StartNew(ProfilerCategory.Memory, "System Used Memory");
-        gcMemoryRecorder = ProfilerRecorder.StartNew(ProfilerCategory.Memory, "GC Reserved Memory");
+        // gcMemoryRecorder = ProfilerRecorder.StartNew(ProfilerCategory.Memory, "GC Reserved Memory");
         gameObjectCountRecorder = ProfilerRecorder.StartNew(ProfilerCategory.Memory, "Game Object Count");
         objectCountRecorder = ProfilerRecorder.StartNew(ProfilerCategory.Memory, "Object Count");
 
@@ -73,26 +73,26 @@ public class ExampleScript : MonoBehaviour
     {
         totalUsedRecorder.Dispose();
         systemMemoryRecorder.Dispose();
-        gcMemoryRecorder.Dispose();
+        // gcMemoryRecorder.Dispose();
         gameObjectCountRecorder.Dispose();
         objectCountRecorder.Dispose();
 
         verticesRecorder.Dispose();
         trianglesRecorder.Dispose();
     }
-
     void Update()
     {
         frameCount++;
 
-        var sb = new StringBuilder(1000);
+        var sb = new StringBuilder(500);
         sb.AppendLine($"Frame Count: {frameCount} - {Convert.ToInt32(1 / Time.unscaledDeltaTime)} fps");
-        sb.AppendLine($"GC Memory: {gcMemoryRecorder.LastValue / (1024 * 1024)} MB");
+        // sb.AppendLine($"GC Memory: {gcMemoryRecorder.LastValue / (1024 * 1024)} MB");
         sb.AppendLine($"System Memory: {systemMemoryRecorder.LastValue / (1024 * 1024)} MB");
         sb.AppendLine($"Total Used Memory: {totalUsedRecorder.LastValue / (1024 * 1024)} MB");
 
         sb.AppendLine($"Game Object Count: {gameObjectCountRecorder.LastValue}");
         sb.AppendLine($"Object Count: {objectCountRecorder.LastValue}");
+
         sb.AppendLine($"Vertices: {verticesRecorder.LastValue}");
         sb.AppendLine($"Triangles: {trianglesRecorder.LastValue}");
 
@@ -103,6 +103,6 @@ public class ExampleScript : MonoBehaviour
 
     void OnGUI()
     {
-        GUI.TextArea(new Rect(10, 30, 250, 150), statsText);
+        GUI.TextArea(new Rect(10, 30, 250, 120), statsText);
     }
 }
