@@ -14,7 +14,7 @@ public class ExampleScript : MonoBehaviour
     string statsText;
 
     ProfilerRecorder totalUsedRecorder;
-    ProfilerRecorder systemMemoryRecorder;
+    ProfilerRecorder systemUsedMemoryRecorder;
     // ProfilerRecorder gcMemoryRecorder;
     ProfilerRecorder gameObjectCountRecorder;
     ProfilerRecorder objectCountRecorder;
@@ -59,7 +59,7 @@ public class ExampleScript : MonoBehaviour
 
         // Momory Profiler
         totalUsedRecorder = ProfilerRecorder.StartNew(ProfilerCategory.Memory, "Total Used Memory");
-        systemMemoryRecorder = ProfilerRecorder.StartNew(ProfilerCategory.Memory, "System Used Memory");
+        systemUsedMemoryRecorder = ProfilerRecorder.StartNew(ProfilerCategory.Memory, "System Used Memory");
         // gcMemoryRecorder = ProfilerRecorder.StartNew(ProfilerCategory.Memory, "GC Reserved Memory");
         gameObjectCountRecorder = ProfilerRecorder.StartNew(ProfilerCategory.Memory, "Game Object Count");
         objectCountRecorder = ProfilerRecorder.StartNew(ProfilerCategory.Memory, "Object Count");
@@ -72,7 +72,7 @@ public class ExampleScript : MonoBehaviour
     void OnDisable()
     {
         totalUsedRecorder.Dispose();
-        systemMemoryRecorder.Dispose();
+        systemUsedMemoryRecorder.Dispose();
         // gcMemoryRecorder.Dispose();
         gameObjectCountRecorder.Dispose();
         objectCountRecorder.Dispose();
@@ -87,7 +87,7 @@ public class ExampleScript : MonoBehaviour
         var sb = new StringBuilder(500);
         sb.AppendLine($"Frame Count: {frameCount} - {Convert.ToInt32(1 / Time.unscaledDeltaTime)} fps");
         // sb.AppendLine($"GC Memory: {gcMemoryRecorder.LastValue / (1024 * 1024)} MB");
-        sb.AppendLine($"System Memory: {systemMemoryRecorder.LastValue / (1024 * 1024)} MB");
+        sb.AppendLine($"System Used Memory: {systemUsedMemoryRecorder.LastValue / (1024 * 1024)} MB");
         sb.AppendLine($"Total Used Memory: {totalUsedRecorder.LastValue / (1024 * 1024)} MB");
 
         sb.AppendLine($"Game Object Count: {gameObjectCountRecorder.LastValue}");
