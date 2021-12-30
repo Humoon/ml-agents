@@ -25,9 +25,10 @@ public class SentryMonitor : MonoBehaviour
     {
         SentryUnity.Init(o =>
         {
-            // o.Dsn = "http://0c853a6b79b14c30a9ab2b56fbc79449@127.0.0.1:9000/9"; //local
-            o.Dsn = "http://888fe57eba274af794fe857cccdbb379@jssz-ai-newton-cpu-03:9000/5"; //server
-            o.Debug = false;
+            o.Dsn = "https://449798ce6def47ceba65af22e57d30c9@o1039766.ingest.sentry.io/6115983"; //sentry.io
+            // o.Dsn = "http://0c853a6b79b14c30a9ab2b56fbc79449@127.0.0.1:9000/9"; //local self-hosted
+            // o.Dsn = "http://888fe57eba274af794fe857cccdbb379@jssz-ai-newton-cpu-03:9000/5"; //server self-hosted
+            o.Debug = true;
             o.EnableLogDebouncing = true;
             o.Environment = "production";
             o.TracesSampleRate = 1.0;
