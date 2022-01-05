@@ -14,6 +14,8 @@ public class SentryMonitor : MonoBehaviour
     string statsText;
 
     ProfilerRecorder totalUsedRecorder;
+
+    private float totalUsedMemory = 0;
     ProfilerRecorder systemUsedMemoryRecorder;
     // ProfilerRecorder gcMemoryRecorder;
     ProfilerRecorder gameObjectCountRecorder;
@@ -70,7 +72,9 @@ public class SentryMonitor : MonoBehaviour
         sb.AppendLine($"Frame Count: {frameCount} - {Convert.ToInt32(1 / Time.unscaledDeltaTime)} fps");
         // sb.AppendLine($"GC Memory: {gcMemoryRecorder.LastValue / (1024 * 1024)} MB");
         sb.AppendLine($"System Used Memory: {systemUsedMemoryRecorder.LastValue / (1024 * 1024)} MB");
-        sb.AppendLine($"Total Used Memory: {totalUsedRecorder.LastValue / (1024 * 1024)} MB");
+
+        totalUsedMemory = totalUsedRecorder.LastValue / (1024 * 1024);
+        sb.AppendLine($"Total Used Memory: {totalUsedMemory} MB");
 
         sb.AppendLine($"Game Object Count: {gameObjectCountRecorder.LastValue}");
         sb.AppendLine($"Object Count: {objectCountRecorder.LastValue}");
@@ -81,6 +85,21 @@ public class SentryMonitor : MonoBehaviour
         statsText = sb.ToString();
 
         SentrySdk.AddBreadcrumb(statsText);
+
+        if (frameCount % 100 == 0)
+        {
+            SentrySdk.ConfigureScope(scope =>
+            {
+                scope.SetTag("TotalUsedMemory", totalUsedMemory.ToString());
+
+                var transaction = SentrySdk.StartTransaction(
+                    "SentryMonitorFrequence", //transaction_name
+                    "OperationName" //operation_name
+                );
+                transaction.Finish();
+
+            });
+        }
     }
 
     // void OnGUI()
