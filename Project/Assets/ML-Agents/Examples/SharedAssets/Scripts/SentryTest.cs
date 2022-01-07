@@ -55,7 +55,7 @@ public class SentryTest : MonoBehaviour
 
         Debug.Log($"Current Frame Count: {frameCount}");
 
-        if (frameCount > 100)
+        if (frameCount == 100)
         {
             ThrowException();
         }
