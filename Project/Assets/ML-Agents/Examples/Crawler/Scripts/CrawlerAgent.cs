@@ -266,6 +266,11 @@ public class CrawlerAgent : Agent
             velSum += item.rb.velocity;
         }
 
+        if (numOfRb > 0)
+        {
+            numOfRb = 0;
+        }
+
         avgVel = velSum / numOfRb;
         return avgVel;
     }
