@@ -170,6 +170,8 @@ public class CrawlerAgent : Agent
         {
             CollectObservationBodyPart(bodyPart, sensor);
         }
+
+        CollectPerformance(sensor);
     }
 
     public override void OnActionReceived(ActionBuffers actionBuffers)
@@ -281,6 +283,21 @@ public class CrawlerAgent : Agent
         //return the value on a declining sigmoid shaped curve that decays from 1 to 0
         //This reward will approach 1 if it matches perfectly and approach zero as it deviates
         return Mathf.Pow(1 - Mathf.Pow(velDeltaMagnitude / TargetWalkingSpeed, 2), 2);
+    }
+
+    public void CollectPerformance(VectorSensor sensor)
+    {
+        var FPS = PerformanceMonitor.Instance.GetFPS();
+        var totalUsedMemory = PerformanceMonitor.Instance.GetTotalUsedMemory();
+        var verticesCount = PerformanceMonitor.Instance.GetVerticesCount();
+        var trianglesCount = PerformanceMonitor.Instance.GetTrianglesCount();
+
+        Debug.Log($"FPS: {FPS}, totalUsedMemory: {totalUsedMemory}");
+
+        sensor.AddObservation(FPS);
+        sensor.AddObservation(totalUsedMemory);
+        sensor.AddObservation(verticesCount);
+        sensor.AddObservation(trianglesCount);
     }
 
     /// <summary>
