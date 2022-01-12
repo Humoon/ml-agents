@@ -297,7 +297,7 @@ public class CrawlerAgent : Agent
         var trianglesCount = PerformanceMonitor.Instance.GetTrianglesCount();
 
         m_statsRecorder.Add("unity_FPS", FPS);
-        m_statsRecorder.Add("unity_totoal_used_memory", totalUsedMemory);
+        m_statsRecorder.Add("unity_total_used_memory", totalUsedMemory);
         m_statsRecorder.Add("unity_vertices_count", verticesCount);
         m_statsRecorder.Add("unity_triangles_count", trianglesCount);
 
