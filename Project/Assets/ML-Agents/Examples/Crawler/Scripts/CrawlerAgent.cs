@@ -70,6 +70,10 @@ public class CrawlerAgent : Agent
     public Material groundedMaterial;
     public Material unGroundedMaterial;
 
+    StatsRecorder m_statsRecorder;
+
+    float fixedUpdateCount = 0;
+
     public override void Initialize()
     {
         SpawnTarget(TargetPrefab, transform.position); //spawn target
@@ -77,6 +81,9 @@ public class CrawlerAgent : Agent
         m_OrientationCube = GetComponentInChildren<OrientationCubeController>();
         m_DirectionIndicator = GetComponentInChildren<DirectionIndicator>();
         m_JdController = GetComponent<JointDriveController>();
+
+        // recorder unity performance
+        m_statsRecorder = Academy.Instance.StatsRecorder;
 
         //Setup each body part
         m_JdController.SetupBodyPart(body);
@@ -170,8 +177,6 @@ public class CrawlerAgent : Agent
         {
             CollectObservationBodyPart(bodyPart, sensor);
         }
-
-        CollectPerformance(sensor);
     }
 
     public override void OnActionReceived(ActionBuffers actionBuffers)
@@ -200,10 +205,13 @@ public class CrawlerAgent : Agent
         bpDict[leg1Lower].SetJointStrength(continuousActions[++i]);
         bpDict[leg2Lower].SetJointStrength(continuousActions[++i]);
         bpDict[leg3Lower].SetJointStrength(continuousActions[++i]);
+
+        CollectPerformance();
     }
 
     void FixedUpdate()
     {
+        fixedUpdateCount += 1;
         UpdateOrientationObjects();
 
         // If enabled the feet will light up green when the foot is grounded.
@@ -285,19 +293,20 @@ public class CrawlerAgent : Agent
         return Mathf.Pow(1 - Mathf.Pow(velDeltaMagnitude / TargetWalkingSpeed, 2), 2);
     }
 
-    public void CollectPerformance(VectorSensor sensor)
+    public void CollectPerformance()
     {
         var FPS = PerformanceMonitor.Instance.GetFPS();
         var totalUsedMemory = PerformanceMonitor.Instance.GetTotalUsedMemory();
         var verticesCount = PerformanceMonitor.Instance.GetVerticesCount();
         var trianglesCount = PerformanceMonitor.Instance.GetTrianglesCount();
 
-        Debug.Log($"FPS: {FPS}, totalUsedMemory: {totalUsedMemory}");
+        m_statsRecorder.Add("fixed_update_cound", fixedUpdateCount);
+        m_statsRecorder.Add("FPS", FPS);
+        m_statsRecorder.Add("totoal_used_memory", totalUsedMemory);
+        m_statsRecorder.Add("vertices_count", verticesCount);
+        m_statsRecorder.Add("triangles_count", trianglesCount);
 
-        sensor.AddObservation(FPS);
-        sensor.AddObservation(totalUsedMemory);
-        sensor.AddObservation(verticesCount);
-        sensor.AddObservation(trianglesCount);
+        Debug.LogWarning($"FPS: {FPS}, totalUsedMemory: {totalUsedMemory}");
     }
 
     /// <summary>
