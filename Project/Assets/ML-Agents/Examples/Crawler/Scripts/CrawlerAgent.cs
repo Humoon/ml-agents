@@ -72,8 +72,6 @@ public class CrawlerAgent : Agent
 
     StatsRecorder m_statsRecorder;
 
-    float fixedUpdateCount = 0;
-
     public override void Initialize()
     {
         SpawnTarget(TargetPrefab, transform.position); //spawn target
@@ -211,9 +209,7 @@ public class CrawlerAgent : Agent
 
     void FixedUpdate()
     {
-        fixedUpdateCount += 1;
         UpdateOrientationObjects();
-
         // If enabled the feet will light up green when the foot is grounded.
         // This is just a visualization and isn't necessary for function
         if (useFootGroundedVisualization)
@@ -300,11 +296,10 @@ public class CrawlerAgent : Agent
         var verticesCount = PerformanceMonitor.Instance.GetVerticesCount();
         var trianglesCount = PerformanceMonitor.Instance.GetTrianglesCount();
 
-        m_statsRecorder.Add("fixed_update_cound", fixedUpdateCount);
-        m_statsRecorder.Add("FPS", FPS);
-        m_statsRecorder.Add("totoal_used_memory", totalUsedMemory);
-        m_statsRecorder.Add("vertices_count", verticesCount);
-        m_statsRecorder.Add("triangles_count", trianglesCount);
+        m_statsRecorder.Add("unity_FPS", FPS);
+        m_statsRecorder.Add("unity_totoal_used_memory", totalUsedMemory);
+        m_statsRecorder.Add("unity_vertices_count", verticesCount);
+        m_statsRecorder.Add("unity_triangles_count", trianglesCount);
 
         Debug.LogWarning($"FPS: {FPS}, totalUsedMemory: {totalUsedMemory}");
     }
