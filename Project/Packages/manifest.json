@@ -10,7 +10,7 @@
     "com.unity.toolchain.macos-x86_64-linux-x86_64": "0.1.20-preview",
     "com.unity.toolchain.win-x86_64-linux-x86_64": "0.1.21-preview",
     "com.unity.ugui": "1.0.0",
-    "io.sentry.unity": "file:X:/WorkCode/unity-0.9.1",
+    "io.sentry.unity": "file:/Users/huyueyue/Work/UnityCode/unity-0.9.1",
     "com.unity.modules.imageconversion": "1.0.0",
     "com.unity.modules.jsonserialize": "1.0.0",
     "com.unity.modules.physics": "1.0.0",

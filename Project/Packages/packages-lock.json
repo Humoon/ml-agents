@@ -140,7 +140,7 @@
       }
     },
     "io.sentry.unity": {
-      "version": "file:X:/WorkCode/unity-0.9.1",
+      "version": "file:/Users/huyueyue/Work/UnityCode/unity-0.9.1",
       "depth": 0,
       "source": "local",
       "dependencies": {}

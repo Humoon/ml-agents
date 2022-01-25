@@ -1,24 +1,20 @@
 import uuid
+
 import pytest
-from mlagents_envs.side_channel import SideChannel, IncomingMessage, OutgoingMessage
-from mlagents_envs.side_channel.side_channel_manager import SideChannelManager
-from mlagents_envs.side_channel.float_properties_channel import FloatPropertiesChannel
-from mlagents_envs.side_channel.raw_bytes_channel import RawBytesChannel
+from mlagents_envs.exception import (UnityCommunicationException,
+                                     UnitySideChannelException)
+from mlagents_envs.side_channel import (IncomingMessage, OutgoingMessage,
+                                        SideChannel)
 from mlagents_envs.side_channel.engine_configuration_channel import (
-    EngineConfigurationChannel,
-    EngineConfig,
-)
-from mlagents_envs.side_channel.environment_parameters_channel import (
-    EnvironmentParametersChannel,
-)
+    EngineConfig, EngineConfigurationChannel)
+from mlagents_envs.side_channel.environment_parameters_channel import \
+    EnvironmentParametersChannel
+from mlagents_envs.side_channel.float_properties_channel import \
+    FloatPropertiesChannel
+from mlagents_envs.side_channel.raw_bytes_channel import RawBytesChannel
+from mlagents_envs.side_channel.side_channel_manager import SideChannelManager
 from mlagents_envs.side_channel.stats_side_channel import (
-    StatsSideChannel,
-    StatsAggregationMethod,
-)
-from mlagents_envs.exception import (
-    UnitySideChannelException,
-    UnityCommunicationException,
-)
+    StatsAggregationMethod, StatsSideChannel)
 
 
 class IntChannel(SideChannel):

@@ -71,6 +71,7 @@ public class CrawlerAgent : Agent
     public Material unGroundedMaterial;
 
     StatsRecorder m_statsRecorder;
+    float passedTime = 0;
 
     public override void Initialize()
     {
@@ -204,7 +205,7 @@ public class CrawlerAgent : Agent
         bpDict[leg2Lower].SetJointStrength(continuousActions[++i]);
         bpDict[leg3Lower].SetJointStrength(continuousActions[++i]);
 
-        CollectPerformance();
+        // PerformanceMonitor.Instance.PrintTimeScale();
     }
 
     void FixedUpdate()
@@ -240,6 +241,13 @@ public class CrawlerAgent : Agent
         var lookAtTargetReward = (Vector3.Dot(cubeForward, body.forward) + 1) * .5F;
 
         AddReward(matchSpeedReward * lookAtTargetReward);
+
+        passedTime += Time.fixedDeltaTime;
+        if (passedTime >= 1)
+        {
+            CollectUnityPerformances();
+            passedTime = 0;
+        }
     }
 
     /// <summary>
@@ -289,19 +297,35 @@ public class CrawlerAgent : Agent
         return Mathf.Pow(1 - Mathf.Pow(velDeltaMagnitude / TargetWalkingSpeed, 2), 2);
     }
 
-    public void CollectPerformance()
+    public void CollectUnityPerformances()
     {
-        var FPS = PerformanceMonitor.Instance.GetFPS();
+        // var FPS = PerformanceMonitor.Instance.GetFPS();
+        var FPS = PerformanceMonitor.Instance.ComputeFPS();
         var totalUsedMemory = PerformanceMonitor.Instance.GetTotalUsedMemory();
         var verticesCount = PerformanceMonitor.Instance.GetVerticesCount();
         var trianglesCount = PerformanceMonitor.Instance.GetTrianglesCount();
+
+        // m_statsRecorder.Add("unity_agent_FPS", 1/Time.deltaTime);
 
         m_statsRecorder.Add("unity_FPS", FPS);
         m_statsRecorder.Add("unity_total_used_memory", totalUsedMemory);
         m_statsRecorder.Add("unity_vertices_count", verticesCount);
         m_statsRecorder.Add("unity_triangles_count", trianglesCount);
 
-        Debug.LogWarning($"FPS: {FPS}, totalUsedMemory: {totalUsedMemory}");
+
+        m_statsRecorder.Add("unity_time_scale", PerformanceMonitor.Instance.GetTimeScale());
+
+        m_statsRecorder.Add("unity_delta_time", PerformanceMonitor.Instance.GetDeltaTime());
+        m_statsRecorder.Add("unity_unscaled_delta_time", PerformanceMonitor.Instance.GetUnScaledDeltaTime());
+
+        m_statsRecorder.Add("unity_time", PerformanceMonitor.Instance.GetTime());
+        m_statsRecorder.Add("unity_unscaled_time", PerformanceMonitor.Instance.GetUnScaledTime());
+
+        m_statsRecorder.Add("unity_fixed_time", PerformanceMonitor.Instance.GetFixedTime());
+        m_statsRecorder.Add("unity_fixed_delta_time", PerformanceMonitor.Instance.GetFixedDeltaTime());
+
+        m_statsRecorder.Add("unity_capture_frame_rate", PerformanceMonitor.Instance.GetCaptureFrameRate());
+        // Debug.Log($"FPS: {FPS}, totalUsedMemory: {totalUsedMemory}");
     }
 
     /// <summary>

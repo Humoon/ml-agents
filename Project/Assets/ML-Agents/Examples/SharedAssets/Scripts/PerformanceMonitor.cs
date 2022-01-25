@@ -1,87 +1,154 @@
-using System.Collections;
-using System.Collections.Generic;
-using System.Text;
-using Unity.Profiling;
 using UnityEngine;
-using UnityEngine.Profiling;
-using System;
+using Unity.Profiling;
 using Crawler.Tools.Patterns;
 
-public class PerformanceMonitor : MonoBehaviourSingleton<PerformanceMonitor>
+
+namespace Unity.MLAgentsExamples
 {
-    // Start is called before the first frame update
-    ProfilerRecorder totalUsedMemoryRecorder;
-    ProfilerRecorder systemUsedMemoryRecorder;
-    // ProfilerRecorder gcMemoryRecorder;
-    ProfilerRecorder gameObjectCountRecorder;
-    ProfilerRecorder objectCountRecorder;
-    ProfilerRecorder verticesCountRecorder;
-    ProfilerRecorder trianglesCountRecorder;
-
-    private float fPS = 0;
-    private float totalUsedMemory = 0;
-    private float systemUsedMemory = 0;
-    private float objectCount = 0;
-    private float gameObjectCount = 0;
-    private float verticesCount = 0;
-    private float trianglesCount = 0;
-
-    void OnEnable()
+    public class PerformanceMonitor : MonoBehaviourSingleton<PerformanceMonitor>
     {
+        // Start is called before the first frame update
+        ProfilerRecorder totalUsedMemoryRecorder;
+        // ProfilerRecorder gcMemoryRecorder;
+        ProfilerRecorder gameObjectCountRecorder;
+        ProfilerRecorder verticesCountRecorder;
+        ProfilerRecorder trianglesCountRecorder;
 
-        // Momory Profiler
-        totalUsedMemoryRecorder = ProfilerRecorder.StartNew(ProfilerCategory.Memory, "Total Used Memory");
-        systemUsedMemoryRecorder = ProfilerRecorder.StartNew(ProfilerCategory.Memory, "System Used Memory");
-        // gcMemoryRecorder = ProfilerRecorder.StartNew(ProfilerCategory.Memory, "GC Reserved Memory");
-        gameObjectCountRecorder = ProfilerRecorder.StartNew(ProfilerCategory.Memory, "Game Object Count");
-        objectCountRecorder = ProfilerRecorder.StartNew(ProfilerCategory.Memory, "Object Count");
+        float lastFrameCount = 0;
+        float lastTimeCount = 0;
+        float PFS;
 
-        // Render Profiler
-        verticesCountRecorder = ProfilerRecorder.StartNew(ProfilerCategory.Render, "Vertices Count");
-        trianglesCountRecorder = ProfilerRecorder.StartNew(ProfilerCategory.Render, "Triangles Count");
-    }
+        void Start()
+        {
+            lastFrameCount = Time.frameCount;
+            lastTimeCount = Time.realtimeSinceStartup;
+        }
 
-    void OnDisable()
-    {
-        totalUsedMemoryRecorder.Dispose();
-        systemUsedMemoryRecorder.Dispose();
-        // gcMemoryRecorder.Dispose();
-        gameObjectCountRecorder.Dispose();
-        objectCountRecorder.Dispose();
 
-        verticesCountRecorder.Dispose();
-        trianglesCountRecorder.Dispose();
-    }
-    public float GetFPS()
-    {
-        return 1 / Time.unscaledDeltaTime;
-    }
+        void OnEnable()
+        {
+            // Momory Profiler
+            totalUsedMemoryRecorder = ProfilerRecorder.StartNew(ProfilerCategory.Memory, "Total Used Memory");
+            // gcMemoryRecorder = ProfilerRecorder.StartNew(ProfilerCategory.Memory, "GC Reserved Memory");
 
-    public float GetTotalUsedMemory()
-    {
-        return totalUsedMemoryRecorder.LastValue / (1024 * 1024);
-    }
+            // Render Profiler
+            verticesCountRecorder = ProfilerRecorder.StartNew(ProfilerCategory.Render, "Vertices Count");
+            trianglesCountRecorder = ProfilerRecorder.StartNew(ProfilerCategory.Render, "Triangles Count");
+        }
 
-    public float GetVerticesCount()
-    {
-        return verticesCountRecorder.LastValue;
-    }
+        /// <summary>
+        /// Dispose all Recorder
+        /// </summary>
+        void OnDisable()
+        {
+            totalUsedMemoryRecorder.Dispose();
+            // gcMemoryRecorder.Dispose();
+            gameObjectCountRecorder.Dispose();
 
-    public float GetTrianglesCount()
-    {
-        return trianglesCountRecorder.LastValue;
+            verticesCountRecorder.Dispose();
+            trianglesCountRecorder.Dispose();
+        }
 
-    }
+        public float GetTimeScale()
+        {
+            return Time.timeScale;
+        }
 
-    void GetPerformance()
-    {
-        fPS = 1 / Time.unscaledDeltaTime;
-        totalUsedMemory = totalUsedMemoryRecorder.LastValue / (1034 * 1024);
-        systemUsedMemory = systemUsedMemoryRecorder.LastValue / (1024 * 1024);
-        gameObjectCount = gameObjectCountRecorder.LastValue;
-        objectCount = objectCountRecorder.LastValue;
+        public float GetDeltaTime()
+        {
+            return Time.deltaTime;
+        }
 
-        verticesCount = verticesCountRecorder.LastValue;
-        trianglesCount = trianglesCountRecorder.LastValue;
+        public float GetUnScaledDeltaTime()
+        {
+            return Time.unscaledDeltaTime;
+        }
+
+        public float GetTime()
+        {
+            return Time.time;
+        }
+
+        public float GetUnScaledTime()
+        {
+            return Time.unscaledTime;
+        }
+
+        public float GetFixedTime()
+        {
+            return Time.fixedTime;
+        }
+
+        public float GetFixedDeltaTime()
+        {
+            return Time.fixedDeltaTime;
+        }
+
+        public float GetCaptureFrameRate()
+        {
+            return Time.captureFramerate;
+        }
+
+        /// <summary>
+        /// Get Current FPS
+        /// </summary>
+        public float GetFPS()
+        {
+            return 1 / Time.deltaTime;
+        }
+
+        /// <summary>
+        ///	Total value of memory that Unity uses and tracks
+        /// </summary>
+        public float GetTotalUsedMemory()
+        {
+            return totalUsedMemoryRecorder.LastValue / (1024 * 1024);
+        }
+
+        /// <summary>
+        /// The number of vertices Unity processed during a frame
+        /// </summary>
+        public float GetVerticesCount()
+        {
+            return verticesCountRecorder.LastValue;
+        }
+
+        /// <summary>
+        /// The number of triangles Unity processed during a frame
+        /// </summary>
+        public float GetTrianglesCount()
+        {
+            return trianglesCountRecorder.LastValue;
+
+        }
+
+        /// <summary>
+        ///  The total number of GameObject instances in the scene
+        /// </summary>
+        public float GetgameObjectCount()
+        {
+            return gameObjectCountRecorder.LastValue;
+        }
+
+        public void PrintTimeScale()
+        {
+            Debug.Log($"Engine Configuration Channel set TimeScale = {Time.timeScale}");
+            Time.timeScale = Time.timeScale;
+            Debug.Log($"DeltaTime = {Time.deltaTime} | UnScaledDeltaTime = {Time.unscaledDeltaTime}");
+        }
+
+        public float ComputeFPS()
+        {
+            float framePass = Time.frameCount - lastFrameCount;
+            float timePass = Time.realtimeSinceStartup - lastTimeCount;
+            var m_fps = framePass / timePass;
+
+            lastFrameCount = Time.frameCount;
+            lastTimeCount = Time.realtimeSinceStartup;
+
+            Debug.Log($"FramePass: {framePass}, and TimePass: {timePass}, and FPS: {m_fps}");
+
+            return m_fps;
+        }
     }
 }
